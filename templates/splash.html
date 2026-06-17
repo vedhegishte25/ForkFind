@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForkFind — Discover places worth the journey</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/splash.css') }}" />
+
+  <style>
+    body {
+      background: #2F5233;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body data-logged-in="{{ 'true' if current_user.is_authenticated else 'false' }}">
+
+  <!-- ── Splash Screen ── -->
+  <div class="splash-screen" id="splash-screen">
+
+    <!-- background blobs -->
+    <div class="splash-bg"></div>
+
+    <!-- floating dots -->
+    <div class="splash-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <!-- main content -->
+    <div class="splash-content">
+
+      <!-- brand name -->
+      <div class="splash-brand">
+        Fork<span class="fork">Find</span>
+      </div>
+
+      <!-- animated divider -->
+      <div class="splash-line"></div>
+
+      <!-- tagline -->
+      <div class="splash-tagline">
+        Discover places worth the journey.
+      </div>
+
+      <!-- get started button -->
+      <a href="#"
+         class="splash-btn"
+         id="get-started-btn"
+         role="button">
+        Get Started
+        <span class="arrow">→</span>
+      </a>
+
+    </div>
+
+    <!-- bottom label -->
+    <div class="splash-footer">
+      Your personal food matchmaker
+    </div>
+
+    <!-- loading bar -->
+    <div class="splash-loader"></div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+
+</body>
+</html>
