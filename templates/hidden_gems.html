@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Hidden Gems{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <h1>💎 Hidden Gems</h1>
+    <p>Underrated places worth the journey. Discovered, not searched.</p>
+  </div>
+</div>
+
+
+<!-- ── Gem Types Filter ── -->
+<div class="container" style="margin-bottom:1.5rem;">
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+
+    <button
+      class="btn btn-primary btn-sm gem-filter active"
+      data-filter="all"
+      onclick="filterGems('all', this)">
+      All Gems
+    </button>
+
+    <button
+      class="btn btn-outline btn-sm gem-filter"
+      data-filter="undiscovered"
+      onclick="filterGems('undiscovered', this)">
+      🔍 Undiscovered
+    </button>
+
+    <button
+      class="btn btn-outline btn-sm gem-filter"
+      data-filter="local_favourite"
+      onclick="filterGems('local_favourite', this)">
+      ❤️ Local Favourites
+    </button>
+
+    <button
+      class="btn btn-outline btn-sm gem-filter"
+      data-filter="rare_find"
+      onclick="filterGems('rare_find', this)">
+      💎 Rare Finds
+    </button>
+
+    <button
+      class="btn btn-outline btn-sm gem-filter"
+      data-filter="rising_star"
+      onclick="filterGems('rising_star', this)">
+      ⭐ Rising Stars
+    </button>
+
+    <button
+      class="btn btn-outline btn-sm gem-filter"
+      data-filter="neighbourhood_gem"
+      onclick="filterGems('neighbourhood_gem', this)">
+      🏘️ Neighbourhood Gems
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ── Gems Grid ── -->
+<div class="container">
+
+  {% if gems %}
+
+    <div style="
+      font-size:0.8rem;
+      color:var(--text-muted);
+      margin-bottom:1rem;
+      font-weight:600;
+    ">
+      {{ gems | length }} HIDDEN GEMS IN {{ city | upper }}
+    </div>
+
+    <div class="grid-3" id="gems-grid">
+      {% for gem in gems %}
+        <div class="gem-card"
+             data-gem-type="{{ gem.gem_type or 'neighbourhood_gem' }}"
+             onclick="window.location.href='/restaurants/{{ gem.place_id }}'">
+
+          <!-- ribbon -->
+          <div class="gem-badge-ribbon">
+            {{ gem.gem_badge or '✨ Hidden Gem' }}
+          </div>
+
+          <!-- gem score -->
+          <div class="gem-score-pill">
+            💎 {{ gem.gem_score }}/10
+          </div>
+
+          <!-- image -->
+          <div style="height:200px; overflow:hidden; position:relative;">
+            {% if gem.photo_url %}
+              <img
+                src="{{ gem.photo_url }}"
+                alt="{{ gem.name }}"
+                loading="lazy"
+                style="width:100%; height:100%; object-fit:cover;"
+              />
+            {% else %}
+              <div style="
+                width:100%; height:100%;
+                display:flex; align-items:center;
+                justify-content:center;
+                background:var(--warm-light);
+                font-size:3.5rem;
+              ">🍽️</div>
+            {% endif %}
+          </div>
+
+          <!-- body -->
+          <div class="restaurant-card-body">
+            <div class="restaurant-card-name">{{ gem.name }}</div>
+            <div class="restaurant-card-meta">
+              <span class="restaurant-card-rating">
+                ★ {{ gem.average_rating or 'N/A' }}
+              </span>
+              <span>{{ gem.total_reviews or 0 }} reviews</span>
+              <span class="restaurant-card-price">
+                {% if gem.price_level == 1 %}₹
+                {% elif gem.price_level == 2 %}₹₹
+                {% elif gem.price_level == 3 %}₹₹₹
+                {% else %}₹₹{% endif %}
+              </span>
+            </div>
+
+            {% if gem.cuisine_type %}
+              <div style="
+                font-size:0.8rem;
+                color:var(--text-muted);
+                margin-bottom:0.5rem;
+              ">
+                {{ gem.cuisine_type }}
+              </div>
+            {% endif %}
+
+            {% if gem.vibe_tags %}
+              <div class="restaurant-card-vibes">
+                {% for vibe in gem.get_vibes()[:3] %}
+                  <span class="vibe-tag">{{ vibe }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    <!-- empty state -->
+    <div class="empty-state" style="padding:5rem 2rem;">
+      <div class="empty-icon">💎</div>
+      <h3>No hidden gems found yet</h3>
+      <p style="max-width:320px; margin:0.5rem auto 1.5rem;">
+        As more restaurants are discovered and reviewed,
+        ForkFind will surface the hidden gems in {{ city }}.
+      </p>
+      <a href="{{ url_for('discover.index') }}" class="btn btn-primary">
+        Start Discovering →
+      </a>
+    </div>
+
+  {% endif %}
+
+</div>
+
+
+<!-- ── What makes a hidden gem ── -->
+<div class="container" style="margin-top:3rem; margin-bottom:2rem;">
+  <div class="section-title">What makes a Hidden Gem?</div>
+  <div class="grid-3" style="margin-top:1rem;">
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+    ">
+      <div style="font-size:1.5rem; margin-bottom:0.625rem;">⭐</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        High quality
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Rating of 4.0 or above.
+        The food actually delivers.
+      </div>
+    </div>
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+    ">
+      <div style="font-size:1.5rem; margin-bottom:0.625rem;">🤫</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        Under the radar
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Fewer than 300 reviews.
+        Not yet discovered by the crowd.
+      </div>
+    </div>
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+    ">
+      <div style="font-size:1.5rem; margin-bottom:0.625rem;">🏪</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        Not a chain
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Independent restaurants only.
+        Real food, real people.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  function filterGems(type, btn) {
+    // update button styles
+    document.querySelectorAll('.gem-filter').forEach(b => {
+      b.classList.remove('btn-primary')
+      b.classList.add('btn-outline')
+    })
+    btn.classList.remove('btn-outline')
+    btn.classList.add('btn-primary')
+
+    // filter cards
+    document.querySelectorAll('#gems-grid .gem-card').forEach(card => {
+      if (type === 'all' || card.dataset.gemType === type) {
+        card.style.display = 'block'
+      } else {
+        card.style.display = 'none'
+      }
+    })
+  }
+</script>
+{% endblock %}

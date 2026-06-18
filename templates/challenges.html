@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Challenges{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <div style="display:flex; align-items:center;
+                justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1>🏆 Food Challenges</h1>
+        <p>Explore, discover and earn badges across Thane and beyond.</p>
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center;">
+        <div style="text-align:center;">
+          <div style="font-size:1.75rem; font-weight:900;
+                      color:var(--sky-blue);">
+            {{ total_badges }}
+          </div>
+          <div style="font-size:0.75rem; color:rgba(250,246,239,0.7);">
+            Badges Earned
+          </div>
+        </div>
+        <div style="text-align:center; margin-left:1rem;">
+          <div style="font-size:1.75rem; font-weight:900;
+                      color:var(--sky-blue);">
+            {{ completed_count }}
+          </div>
+          <div style="font-size:0.75rem; color:rgba(250,246,239,0.7);">
+            Completed
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="container" style="padding-top:1.5rem; padding-bottom:3rem;">
+
+
+  <!-- ── Active Challenges ── -->
+  {% if enrolled %}
+    <div style="margin-bottom:2.5rem;">
+      <div class="section-title">Your Active Challenges</div>
+      <div class="section-subtitle">Keep going — you're on a roll</div>
+
+      <div class="grid-2" style="margin-top:1rem;">
+        {% for uc in enrolled %}
+          <div class="challenge-card {{ 'completed' if uc.completed else '' }}"
+               data-challenge-id="{{ uc.challenge_id }}">
+
+            <div class="challenge-header">
+
+              <!-- icon -->
+              <div class="challenge-icon">
+                {{ uc.challenge.badge_icon }}
+              </div>
+
+              <!-- info -->
+              <div style="flex:1;">
+                <div class="challenge-title">
+                  {{ uc.challenge.name }}
+                </div>
+                <div class="challenge-desc">
+                  {{ uc.challenge.description }}
+                </div>
+              </div>
+
+              <!-- progress ring -->
+              <div class="progress-ring-container">
+                <svg class="progress-ring-svg" viewBox="0 0 80 80">
+                  <circle class="progress-ring-bg" cx="40" cy="40" r="30"/>
+                  <circle
+                    class="progress-ring-fill {{ 'accent' if uc.completed else '' }}"
+                    cx="40" cy="40" r="30"
+                    data-percent="{{ uc.progress_percent() }}"
+                  />
+                </svg>
+                <div class="progress-ring-text">
+                  {% if uc.completed %}
+                    ✓
+                  {% else %}
+                    {{ uc.progress_percent() }}%
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+
+            <!-- progress bar -->
+            <div class="challenge-progress-text">
+              <span>
+                <strong class="challenge-current">
+                  {{ uc.current_count }}
+                </strong>
+                / {{ uc.challenge.target_count }}
+                {% if uc.completed %}
+                  · Completed!
+                {% else %}
+                  visited
+                {% endif %}
+              </span>
+              <span>{{ uc.progress_percent() }}%</span>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill
+                          {{ 'accent' if uc.completed else '' }}"
+                   style="width:{{ uc.progress_percent() }}%">
+              </div>
+            </div>
+
+            <!-- completed badge -->
+            {% if uc.completed %}
+              <div style="
+                margin-top:0.875rem;
+                padding:0.625rem;
+                background:rgba(47,82,51,0.06);
+                border-radius:var(--radius-md);
+                text-align:center;
+                font-size:0.8rem;
+                color:var(--pine-green);
+                font-weight:700;
+              ">
+                🏆 {{ uc.challenge.badge_name }} earned
+                {% if uc.completed_at %}
+                  · {{ uc.completed_at.strftime('%d %b %Y') }}
+                {% endif %}
+              </div>
+            {% else %}
+              <!-- checkin button -->
+              <button
+                class="btn btn-primary w-100 checkin-btn"
+                style="margin-top:0.875rem;"
+                data-challenge-id="{{ uc.challenge_id }}"
+                onclick="document.dispatchEvent(
+                  new CustomEvent('checkin', {
+                    detail: { challengeId: {{ uc.challenge_id }} }
+                  })
+                )">
+                + Check In at a Restaurant
+              </button>
+            {% endif %}
+
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+
+  <!-- ── Available Challenges ── -->
+  {% if available %}
+    <div style="margin-bottom:2.5rem;">
+      <div class="section-title">Available Challenges</div>
+      <div class="section-subtitle">
+        Start a new challenge and earn your next badge
+      </div>
+
+      <div class="grid-3" style="margin-top:1rem;">
+        {% for challenge in available %}
+          <div class="badge-card" style="text-align:left; padding:1.25rem;">
+
+            <div style="display:flex; align-items:center;
+                        gap:0.75rem; margin-bottom:0.875rem;">
+              <div class="challenge-icon" style="flex-shrink:0;">
+                {{ challenge.badge_icon }}
+              </div>
+              <div>
+                <div class="badge-name" style="font-size:0.9rem;">
+                  {{ challenge.name }}
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">
+                  {{ challenge.target_count }} places to visit
+                </div>
+              </div>
+            </div>
+
+            <div class="badge-desc" style="margin-bottom:1rem;
+                                           font-size:0.825rem;
+                                           line-height:1.5;">
+              {{ challenge.description }}
+            </div>
+
+            <!-- badge preview -->
+            <div style="
+              display:flex; align-items:center; gap:0.5rem;
+              padding:0.5rem 0.75rem;
+              background:rgba(47,82,51,0.06);
+              border-radius:var(--radius-md);
+              margin-bottom:1rem;
+              font-size:0.8rem;
+            ">
+              <span>🏅</span>
+              <span style="color:var(--pine-green); font-weight:600;">
+                Earn: {{ challenge.badge_name }}
+              </span>
+            </div>
+
+            <button
+              class="btn btn-outline w-100 enroll-btn"
+              data-challenge-id="{{ challenge.id }}">
+              Start Challenge
+            </button>
+
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+
+  <!-- ── Empty State ── -->
+  {% if not enrolled and not available %}
+    <div class="empty-state" style="padding:4rem 2rem;">
+      <div class="empty-icon">🏆</div>
+      <h3>No challenges available yet</h3>
+      <p style="max-width:300px; margin:0.5rem auto 1.5rem;">
+        Seed the default challenges to get started
+      </p>
+      <button
+        id="seed-challenges-btn"
+        class="btn btn-primary">
+        Load Challenges
+      </button>
+    </div>
+  {% endif %}
+
+
+  <!-- ── How Challenges Work ── -->
+  <div style="margin-top:1rem;">
+    <div class="section-title">How it works</div>
+    <div class="grid-3" style="margin-top:1rem;">
+
+      <div style="
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:var(--radius-lg);
+        padding:1.25rem;
+        text-align:center;
+      ">
+        <div style="font-size:1.75rem; margin-bottom:0.625rem;">🎯</div>
+        <div style="font-weight:700; margin-bottom:0.375rem;
+                    color:var(--text-primary);">
+          Pick a challenge
+        </div>
+        <div style="font-size:0.825rem; color:var(--text-muted);">
+          Choose from Street Food Hunter,
+          Thane Explorer and more.
+        </div>
+      </div>
+
+      <div style="
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:var(--radius-lg);
+        padding:1.25rem;
+        text-align:center;
+      ">
+        <div style="font-size:1.75rem; margin-bottom:0.625rem;">📍</div>
+        <div style="font-weight:700; margin-bottom:0.375rem;
+                    color:var(--text-primary);">
+          Visit restaurants
+        </div>
+        <div style="font-size:0.825rem; color:var(--text-muted);">
+          Check in at qualifying places
+          to track your progress.
+        </div>
+      </div>
+
+      <div style="
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:var(--radius-lg);
+        padding:1.25rem;
+        text-align:center;
+      ">
+        <div style="font-size:1.75rem; margin-bottom:0.625rem;">🏅</div>
+        <div style="font-weight:700; margin-bottom:0.375rem;
+                    color:var(--text-primary);">
+          Earn your badge
+        </div>
+        <div style="font-size:0.825rem; color:var(--text-muted);">
+          Complete the challenge and
+          unlock your badge permanently.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ── Badges Wall ── -->
+  {% if completed_count > 0 %}
+    <div style="margin-top:2.5rem;">
+      <div class="section-title">Your Badge Wall</div>
+      <div class="section-subtitle">Badges you have earned</div>
+
+      <div style="
+        display:flex;
+        flex-wrap:wrap;
+        gap:1rem;
+        margin-top:1rem;
+        padding:1.5rem;
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:var(--radius-xl);
+      ">
+        {% for uc in enrolled %}
+          {% if uc.completed %}
+            <div style="text-align:center; padding:0.75rem 1rem;">
+              <div style="font-size:2.5rem; margin-bottom:0.375rem;">
+                {{ uc.challenge.badge_icon }}
+              </div>
+              <div style="font-size:0.75rem; font-weight:700;
+                          color:var(--pine-green);">
+                {{ uc.challenge.badge_name }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/challenges.js') }}"></script>
+<script>
+  // listen for checkin custom event from challenge cards
+  document.addEventListener('checkin', (e) => {
+    const { challengeId } = e.detail
+    const btn = document.querySelector(
+      `.checkin-btn[data-challenge-id="${challengeId}"]`
+    )
+    if (btn) btn.click()
+  })
+</script>
+{% endblock %}

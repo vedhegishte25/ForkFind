@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}Group Decision Solver{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <h1>🍽️ Group Decision Solver</h1>
+    <p>Nobody can decide? Let ForkFind find the perfect place for everyone.</p>
+  </div>
+</div>
+
+
+<div class="container" style="padding-top:1.5rem; padding-bottom:3rem;">
+  <div style="max-width:680px; margin:0 auto;">
+
+
+    <!-- ── Step: Start ── -->
+    <div class="group-step" id="step-start">
+
+      <div style="text-align:center; margin-bottom:2rem;">
+        <div style="font-size:3rem; margin-bottom:0.75rem;">🤷</div>
+        <h2 style="margin-bottom:0.5rem;">Where should we eat?</h2>
+        <p style="color:var(--text-muted);">
+          Create a session and share the code.
+          Everyone picks their preferences.
+          AI finds what works for all.
+        </p>
+      </div>
+
+      <!-- how it works -->
+      <div style="
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:1rem;
+        margin-bottom:2rem;
+      ">
+        <div style="text-align:center; padding:1rem;">
+          <div style="
+            width:40px; height:40px;
+            border-radius:50%;
+            background:var(--pine-green);
+            color:var(--cream);
+            display:flex; align-items:center;
+            justify-content:center;
+            font-weight:800;
+            margin:0 auto 0.625rem;
+          ">1</div>
+          <div style="font-size:0.825rem; font-weight:600;
+                      color:var(--text-primary);">
+            Create session
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted);
+                      margin-top:0.25rem;">
+            Get a 6-digit code
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:1rem;">
+          <div style="
+            width:40px; height:40px;
+            border-radius:50%;
+            background:var(--pine-green);
+            color:var(--cream);
+            display:flex; align-items:center;
+            justify-content:center;
+            font-weight:800;
+            margin:0 auto 0.625rem;
+          ">2</div>
+          <div style="font-size:0.825rem; font-weight:600;
+                      color:var(--text-primary);">
+            Friends join
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted);
+                      margin-top:0.25rem;">
+            Share the code
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:1rem;">
+          <div style="
+            width:40px; height:40px;
+            border-radius:50%;
+            background:var(--pine-green);
+            color:var(--cream);
+            display:flex; align-items:center;
+            justify-content:center;
+            font-weight:800;
+            margin:0 auto 0.625rem;
+          ">3</div>
+          <div style="font-size:0.825rem; font-weight:600;
+                      color:var(--text-primary);">
+            AI decides
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted);
+                      margin-top:0.25rem;">
+            Perfect match for all
+          </div>
+        </div>
+      </div>
+
+      <!-- action buttons -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+
+        <!-- create -->
+        <div class="card" style="padding:1.5rem; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:0.625rem;">✨</div>
+          <div style="font-weight:700; margin-bottom:0.375rem;
+                      color:var(--text-primary);">
+            Start a session
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-muted);
+                      margin-bottom:1rem;">
+            You'll get a code to share
+          </div>
+          <button
+            id="create-session-btn"
+            class="btn btn-primary w-100">
+            Create Session
+          </button>
+        </div>
+
+        <!-- join -->
+        <div class="card" style="padding:1.5rem; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:0.625rem;">🔗</div>
+          <div style="font-weight:700; margin-bottom:0.375rem;
+                      color:var(--text-primary);">
+            Join a session
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-muted);
+                      margin-bottom:0.75rem;">
+            Enter the code from your friend
+          </div>
+          <input
+            type="text"
+            id="join-code-input"
+            class="form-control"
+            placeholder="Enter 6-digit code"
+            maxlength="6"
+            style="text-align:center; font-size:1.1rem;
+                   font-weight:700; letter-spacing:4px;
+                   text-transform:uppercase; margin-bottom:0.75rem;"
+          />
+          <button
+            id="join-session-btn"
+            class="btn btn-outline w-100">
+            Join Session
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ── Step: Session Created ── -->
+    <div class="group-step" id="step-session-created" style="display:none;">
+
+      <!-- session code display -->
+      <div class="session-code-display" style="margin-bottom:1.5rem;">
+        <div style="font-size:0.875rem; color:rgba(250,246,239,0.7);
+                    margin-bottom:0.375rem;">
+          Your session code
+        </div>
+        <div class="session-code" id="session-code-display">——————</div>
+        <div style="font-size:0.8rem; color:rgba(250,246,239,0.6);
+                    margin-top:0.375rem;">
+          Share this with your friends
+        </div>
+
+        <!-- copy button -->
+        <button
+          id="copy-code-btn"
+          class="btn btn-accent"
+          style="margin-top:1rem;">
+          📋 Copy Code
+        </button>
+      </div>
+
+      <!-- members count -->
+      <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;
+                                text-align:center;">
+        <div style="font-size:0.8rem; color:var(--text-muted);
+                    font-weight:600; margin-bottom:0.375rem;">
+          MEMBERS JOINED
+        </div>
+        <div style="font-size:2.5rem; font-weight:900;
+                    color:var(--pine-green);">
+          <span id="members-count">1</span>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+          Waiting for friends to join...
+        </div>
+      </div>
+
+      <!-- proceed to preferences -->
+      <button
+        onclick="showStep('preferences')"
+        class="btn btn-primary w-100 btn-lg">
+        Set My Preferences →
+      </button>
+
+    </div>
+
+
+    <!-- ── Step: Preferences ── -->
+    <div class="group-step" id="step-preferences" style="display:none;">
+
+      <h2 style="margin-bottom:0.375rem;">Your preferences</h2>
+      <p style="color:var(--text-muted); font-size:0.875rem;
+                margin-bottom:1.5rem;">
+        Be honest — the AI needs real preferences to find the best match.
+      </p>
+
+      <!-- budget -->
+      <div class="form-group">
+        <label class="form-label">
+          Budget per person —
+          <span id="budget-display"
+                style="color:var(--pine-green); font-weight:700;">
+            ₹500
+          </span>
+        </label>
+        <input
+          type="range"
+          id="budget-input"
+          min="100" max="2000" step="100" value="500"
+          class="spice-slider"
+          oninput="document.getElementById('budget-display').textContent='₹'+this.value"
+        />
+        <div class="spice-labels">
+          <span>₹100</span>
+          <span>₹1000</span>
+          <span>₹2000+</span>
+        </div>
+      </div>
+
+      <!-- dietary -->
+      <div class="form-group">
+        <label class="form-label">Dietary preference</label>
+        <select id="dietary-select" class="form-control">
+          <option value="non-veg">Non-Vegetarian</option>
+          <option value="veg">Vegetarian</option>
+          <option value="vegan">Vegan</option>
+        </select>
+      </div>
+
+      <!-- distance -->
+      <div class="form-group">
+        <label class="form-label">
+          Max distance —
+          <span id="distance-display"
+                style="color:var(--pine-green); font-weight:700;">
+            5 km
+          </span>
+        </label>
+        <input
+          type="range"
+          id="distance-input"
+          min="1" max="20" step="1" value="5"
+          class="spice-slider"
+          oninput="document.getElementById('distance-display').textContent=this.value+' km'"
+        />
+        <div class="spice-labels">
+          <span>1 km</span>
+          <span>10 km</span>
+          <span>20 km</span>
+        </div>
+      </div>
+
+      <!-- cuisines -->
+      <div class="form-group">
+        <label class="form-label">Cuisines you want</label>
+        <div class="vibe-grid">
+          {% set cuisines = [
+            'Indian','Chinese','Italian','Continental',
+            'Japanese','Thai','Street Food','Fast Food',
+            'Seafood','Desserts','Cafe','Mexican'
+          ] %}
+          {% for cuisine in cuisines %}
+            <div class="vibe-chip cuisine-chip"
+                 data-cuisine="{{ cuisine }}">
+              {{ cuisine }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- vibes -->
+      <div class="form-group">
+        <label class="form-label">Vibe you're after</label>
+        <div class="vibe-grid">
+          {% set vibes = [
+            'Cozy','Rooftop','Casual','Family-friendly',
+            'Romantic','Late-night','Work-friendly','Loud & Fun'
+          ] %}
+          {% for vibe in vibes %}
+            <div class="vibe-chip" data-vibe="{{ vibe }}">
+              {{ vibe }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button
+        id="submit-prefs-btn"
+        class="btn btn-primary w-100 btn-lg">
+        Save My Preferences →
+      </button>
+
+    </div>
+
+
+    <!-- ── Step: Waiting for Others ── -->
+    <div class="group-step" id="step-waiting-for-others"
+         style="display:none;">
+
+      <div style="text-align:center; padding:2rem 0;">
+        <div class="ai-dots" style="justify-content:center;
+                                     margin-bottom:1rem;">
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+          <div class="ai-dot"></div>
+        </div>
+        <h2 style="margin-bottom:0.5rem;">Waiting for the group</h2>
+        <p style="color:var(--text-muted); margin-bottom:1.5rem;">
+          <span id="prefs-count">1</span> member(s) have submitted preferences.
+          Need at least 2 to solve.
+        </p>
+
+        <!-- session code reminder -->
+        <div style="
+          background:rgba(47,82,51,0.06);
+          border:1px solid rgba(47,82,51,0.15);
+          border-radius:var(--radius-lg);
+          padding:1rem;
+          margin-bottom:1.5rem;
+          display:inline-block;
+        ">
+          <div style="font-size:0.75rem; color:var(--text-muted);
+                      margin-bottom:0.25rem;">Session Code</div>
+          <div style="font-size:1.75rem; font-weight:900;
+                      letter-spacing:6px; color:var(--pine-green);"
+               id="waiting-code-display">——</div>
+        </div>
+
+        <br/>
+
+        <button
+          id="solve-btn"
+          class="btn btn-primary btn-lg"
+          style="opacity:0.4;"
+          disabled>
+          🤖 Find Our Match
+        </button>
+
+        <div style="font-size:0.75rem; color:var(--text-muted);
+                    margin-top:0.75rem;">
+          Button activates when 2+ members submit preferences
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ── Step: Results ── -->
+    <div class="group-step" id="step-results" style="display:none;">
+
+      <div style="
+        display:flex; align-items:center;
+        justify-content:space-between;
+        margin-bottom:1.5rem;
+        flex-wrap:wrap; gap:0.75rem;
+      ">
+        <h2 style="margin-bottom:0;">🎯 Perfect matches found</h2>
+        <button
+          onclick="showStep('start')"
+          class="btn btn-outline btn-sm">
+          New Session
+        </button>
+      </div>
+
+      <div id="results-container"></div>
+
+    </div>
+
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/group.js') }}"></script>
+<script>
+  // sync waiting code display
+  const observer = new MutationObserver(() => {
+    const code = document.getElementById('session-code-display')?.textContent
+    const waiting = document.getElementById('waiting-code-display')
+    if (code && waiting) waiting.textContent = code
+  })
+
+  const codeEl = document.getElementById('session-code-display')
+  if (codeEl) {
+    observer.observe(codeEl, { childList: true, characterData: true, subtree: true })
+  }
+
+  // expose showStep globally for inline onclick
+  function showStep(name) {
+    document.querySelectorAll('.group-step').forEach(s => {
+      s.style.display = 'none'
+    })
+    const target = document.getElementById(`step-${name}`)
+    if (target) {
+      target.style.display = 'block'
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+</script>
+{% endblock %}

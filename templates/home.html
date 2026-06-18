@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ── Context Banner ── -->
+<div class="container" style="padding-top:1.5rem;">
+  <div class="context-banner">
+    <div class="context-info">
+
+      <div class="context-item">
+        {% if context.weather == 'rainy' %}
+          🌧️
+        {% elif context.weather == 'sunny' %}
+          ☀️
+        {% elif context.weather == 'cloudy' %}
+          ☁️
+        {% elif context.weather == 'stormy' %}
+          ⛈️
+        {% else %}
+          🌤️
+        {% endif %}
+        <span>{{ context.weather | capitalize }}</span>
+      </div>
+
+      <div class="context-item">
+        🕐 {{ context.time_of_day | replace('_', ' ') | capitalize }}
+      </div>
+
+      <div class="context-item">
+        📍 {{ current_user.city or 'Thane' }}
+      </div>
+
+      {% if context.festival %}
+        <div class="context-item">
+          🎉 {{ context.festival }}
+        </div>
+      {% endif %}
+
+    </div>
+
+    {% if recommendations %}
+      <div class="context-suggestion">
+        💡 {{ recommendations[0] }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<!-- ── Hero ── -->
+<div class="container" style="padding-top:1rem;">
+  <div style="
+    background: var(--pine-green);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    color: var(--cream);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  ">
+
+    <!-- background decoration -->
+    <div style="
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(135,191,255,0.08);
+    "></div>
+
+    <div style="position:relative; z-index:1;">
+      <h1 style="
+        color: var(--cream);
+        font-size: clamp(1.5rem, 4vw, 2.25rem);
+        margin-bottom: 0.5rem;
+      ">
+        What are you in the mood for,
+        <span style="color:var(--sky-blue);">
+          {{ current_user.name.split()[0] }}?
+        </span>
+      </h1>
+      <p style="color:rgba(250,246,239,0.75); margin-bottom:1.5rem;">
+        ForkFind knows your taste better than your friends.
+      </p>
+      <a href="{{ url_for('discover.index') }}"
+         class="btn btn-accent btn-lg">
+        Discover Now →
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Quick Mood Picks ── -->
+<div class="container">
+  <div class="section-title">Quick picks</div>
+  <div class="section-subtitle">Tap a mood to find your perfect place</div>
+
+  <div class="mood-grid">
+    {% set quick_moods = [
+      {'id': 'comfort',    'label': 'Comfort Food',  'emoji': '🍲'},
+      {'id': 'date_night', 'label': 'Date Night',    'emoji': '🕯️'},
+      {'id': 'late_night', 'label': 'Late Night',    'emoji': '🌙'},
+      {'id': 'healthy',    'label': 'Healthy',       'emoji': '🥗'},
+      {'id': 'cheat_meal', 'label': 'Cheat Meal',   'emoji': '🍔'},
+      {'id': 'rainy_day',  'label': 'Rainy Day',    'emoji': '🌧️'},
+    ] %}
+
+    {% for mood in quick_moods %}
+      <div class="mood-card"
+           onclick="quickDiscover('{{ mood.id }}', '{{ mood.label }}')"
+           style="cursor:pointer;">
+        <span class="mood-emoji">{{ mood.emoji }}</span>
+        <div class="mood-label">{{ mood.label }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ── Food DNA Snapshot ── -->
+{% if food_dna %}
+<div class="container" style="margin-top:2rem;">
+  <div class="flex-between" style="margin-bottom:1rem;">
+    <div>
+      <div class="section-title">Your Food DNA</div>
+      <div class="section-subtitle" style="margin-bottom:0;">
+        Based on your taste history
+      </div>
+    </div>
+    <a href="{{ url_for('profile.view_profile') }}"
+       style="font-size:0.875rem; color:var(--pine-green); font-weight:600;">
+      View full profile →
+    </a>
+  </div>
+
+  <div class="card" style="padding:1.5rem;">
+    <div class="dna-wrapper">
+
+      <!-- donut chart -->
+      <div class="donut-container">
+        <canvas class="donut-canvas" id="dna-donut-canvas"
+                width="200" height="200"></canvas>
+        <div class="donut-center">
+          <div class="donut-center-value" id="donut-center-value">—</div>
+          <div class="donut-center-label" id="donut-center-label">top cuisine</div>
+        </div>
+      </div>
+
+      <!-- legend -->
+      <div class="dna-legend-list" id="dna-legend-container"></div>
+
+    </div>
+  </div>
+
+  <!-- hidden data for JS -->
+  <script id="dna-data" type="application/json">
+    {{ food_dna | tojson }}
+  </script>
+</div>
+{% endif %}
+
+
+<!-- ── Hidden Gems Teaser ── -->
+<div class="container" style="margin-top:2rem;">
+  <div class="flex-between" style="margin-bottom:1rem;">
+    <div>
+      <div class="section-title">Hidden Gems nearby</div>
+      <div class="section-subtitle" style="margin-bottom:0;">
+        Places worth the journey
+      </div>
+    </div>
+    <a href="{{ url_for('restaurants.hidden_gems') }}"
+       style="font-size:0.875rem; color:var(--pine-green); font-weight:600;">
+      See all →
+    </a>
+  </div>
+
+  {% if gems %}
+    <div class="grid-3">
+      {% for gem in gems[:3] %}
+        <div class="gem-card"
+             onclick="window.location.href='/restaurants/{{ gem.place_id }}'">
+          <div class="gem-badge-ribbon">
+            💎 Hidden Gem
+          </div>
+          <div class="restaurant-card-img">
+            {% if gem.photo_url %}
+              <img src="{{ gem.photo_url }}" alt="{{ gem.name }}"
+                   loading="lazy" style="width:100%;height:100%;object-fit:cover;"/>
+            {% else %}
+              <div style="font-size:3rem; display:flex; align-items:center;
+                          justify-content:center; height:100%;
+                          background:var(--warm-light);">🍽️</div>
+            {% endif %}
+          </div>
+          <div class="restaurant-card-body">
+            <div class="restaurant-card-name">{{ gem.name }}</div>
+            <div class="restaurant-card-meta">
+              <span class="restaurant-card-rating">
+                ★ {{ gem.average_rating or 'N/A' }}
+              </span>
+              <span>{{ gem.cuisine_type or 'Restaurant' }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>Discovering gems near you</h3>
+      <p>Start exploring to unlock hidden places</p>
+    </div>
+  {% endif %}
+</div>
+
+
+<!-- ── Stats Row ── -->
+<div class="container" style="margin-top:2rem;">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ review_count or 0 }}</div>
+      <div class="stat-label">Places visited</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ badge_count or 0 }}</div>
+      <div class="stat-label">Badges earned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ challenge_count or 0 }}</div>
+      <div class="stat-label">Challenges active</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Group Invite CTA ── -->
+<div class="container" style="margin-top:1.5rem; margin-bottom:2rem;">
+  <div style="
+    background: rgba(135,191,255,0.12);
+    border: 1px solid rgba(135,191,255,0.3);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  ">
+    <div>
+      <div style="font-size:1.1rem; font-weight:800;
+                  color:var(--pine-green); margin-bottom:0.25rem;">
+        Can't decide where to eat? 🤷
+      </div>
+      <div style="font-size:0.875rem; color:var(--text-muted);">
+        Start a group session. Everyone picks. AI decides.
+      </div>
+    </div>
+    <a href="{{ url_for('group.index') }}" class="btn btn-primary">
+      Start Group Session →
+    </a>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dna_chart.js') }}"></script>
+<script>
+  // quick discover from home page mood cards
+  function quickDiscover(moodId, moodLabel) {
+    window.location.href = `/discover/?mood=${moodId}&label=${encodeURIComponent(moodLabel)}`
+  }
+</script>
+{% endblock %}

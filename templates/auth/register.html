@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+
+<div style="
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--cream) 0%,
+    rgba(135,191,255,0.08) 100%
+  );
+">
+
+  <div style="width:100%; max-width:520px;">
+
+    <!-- header -->
+    <div style="text-align:center; margin-bottom:2rem;">
+      <div style="
+        font-size:2rem;
+        font-weight:900;
+        color:var(--pine-green);
+        letter-spacing:-1px;
+        margin-bottom:0.5rem;
+      ">
+        Fork<span style="color:var(--sky-blue)">Find</span>
+      </div>
+      <h1 style="font-size:1.5rem; margin-bottom:0.375rem;">
+        Build your food profile
+      </h1>
+      <p style="color:var(--text-muted); font-size:0.9rem;">
+        Takes 2 minutes. Makes every recommendation personal.
+      </p>
+    </div>
+
+    <!-- step dots -->
+    <div class="onboarding-steps" id="step-dots">
+      <div class="step-dot active" id="dot-1"></div>
+      <div class="step-dot" id="dot-2"></div>
+      <div class="step-dot" id="dot-3"></div>
+      <div class="step-dot" id="dot-4"></div>
+      <div class="step-dot" id="dot-5"></div>
+    </div>
+
+    <!-- form card -->
+    <div class="card" style="border-radius:var(--radius-xl); padding:2rem;">
+
+      <form method="POST" action="{{ url_for('auth.register') }}" id="register-form">
+
+        <!-- ── Step 1: Basic Info ── -->
+        <div class="onboarding-step" id="step-1">
+          <h3 style="margin-bottom:0.375rem;">Who are you?</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem;
+                    margin-bottom:1.5rem;">
+            Let's start with the basics
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="name">Full name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-control"
+              placeholder="Your name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-control"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-control"
+              placeholder="At least 8 characters"
+              required
+              minlength="8"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="city">Your city</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              class="form-control"
+              placeholder="e.g. Thane, Mumbai"
+              value="Thane"
+            />
+          </div>
+
+          <button type="button" class="btn btn-primary w-100"
+                  onclick="nextStep(1)">
+            Continue →
+          </button>
+        </div>
+
+
+        <!-- ── Step 2: Diet & Spice ── -->
+        <div class="onboarding-step" id="step-2" style="display:none;">
+          <h3 style="margin-bottom:0.375rem;">Your eating style</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem;
+                    margin-bottom:1.5rem;">
+            This helps us filter restaurants perfectly
+          </p>
+
+          <!-- diet type -->
+          <div class="form-group">
+            <label class="form-label">Diet preference</label>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr);
+                        gap:0.75rem; margin-top:0.5rem;">
+              <label class="diet-option" id="diet-veg">
+                <input type="radio" name="diet_type" value="veg"
+                       style="display:none" />
+                <div class="diet-card" onclick="selectDiet(this, 'veg')">
+                  <span style="font-size:1.5rem;">🥦</span>
+                  <span>Vegetarian</span>
+                </div>
+              </label>
+              <label class="diet-option" id="diet-nonveg">
+                <input type="radio" name="diet_type" value="non-veg"
+                       style="display:none" checked />
+                <div class="diet-card selected" onclick="selectDiet(this, 'non-veg')">
+                  <span style="font-size:1.5rem;">🍗</span>
+                  <span>Non-Veg</span>
+                </div>
+              </label>
+              <label class="diet-option" id="diet-vegan">
+                <input type="radio" name="diet_type" value="vegan"
+                       style="display:none" />
+                <div class="diet-card" onclick="selectDiet(this, 'vegan')">
+                  <span style="font-size:1.5rem;">🌱</span>
+                  <span>Vegan</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- spice level -->
+          <div class="form-group" style="margin-top:1.5rem;">
+            <label class="form-label">
+              Spice tolerance —
+              <span id="spice-value" style="color:var(--pine-green);
+                                             font-weight:700;">5</span>/10
+            </label>
+            <div class="spice-slider-wrap" style="margin-top:0.75rem;">
+              <input
+                type="range"
+                name="spice_tolerance"
+                id="spice-slider"
+                class="spice-slider"
+                min="1" max="10" value="5"
+                oninput="document.getElementById('spice-value').textContent=this.value"
+              />
+              <div class="spice-labels">
+                <span>🧊 Mild</span>
+                <span>🌶️ Hot</span>
+                <span>🔥 Extra Hot</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+            <button type="button" class="btn btn-outline"
+                    onclick="prevStep(2)" style="flex:1;">
+              ← Back
+            </button>
+            <button type="button" class="btn btn-primary"
+                    onclick="nextStep(2)" style="flex:2;">
+              Continue →
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ── Step 3: Budget ── -->
+        <div class="onboarding-step" id="step-3" style="display:none;">
+          <h3 style="margin-bottom:0.375rem;">What's your budget?</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem;
+                    margin-bottom:1.5rem;">
+            Per person, per meal
+          </p>
+
+          <div style="display:grid; grid-template-columns:repeat(2,1fr);
+                      gap:0.75rem;">
+
+            <div class="budget-option selected" data-min="100" data-max="300"
+                 onclick="selectBudget(this)">
+              <div style="font-size:1.25rem; font-weight:800;
+                          color:var(--pine-green);">₹100–300</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                Street food & quick bites
+              </div>
+            </div>
+
+            <div class="budget-option" data-min="300" data-max="600"
+                 onclick="selectBudget(this)">
+              <div style="font-size:1.25rem; font-weight:800;
+                          color:var(--pine-green);">₹300–600</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                Casual dining
+              </div>
+            </div>
+
+            <div class="budget-option" data-min="600" data-max="1200"
+                 onclick="selectBudget(this)">
+              <div style="font-size:1.25rem; font-weight:800;
+                          color:var(--pine-green);">₹600–1200</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                Mid-range restaurants
+              </div>
+            </div>
+
+            <div class="budget-option" data-min="1200" data-max="3000"
+                 onclick="selectBudget(this)">
+              <div style="font-size:1.25rem; font-weight:800;
+                          color:var(--pine-green);">₹1200+</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                Fine dining & luxury
+              </div>
+            </div>
+
+          </div>
+
+          <!-- hidden inputs -->
+          <input type="hidden" name="budget_min" id="budget-min" value="100" />
+          <input type="hidden" name="budget_max" id="budget-max" value="300" />
+
+          <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+            <button type="button" class="btn btn-outline"
+                    onclick="prevStep(3)" style="flex:1;">
+              ← Back
+            </button>
+            <button type="button" class="btn btn-primary"
+                    onclick="nextStep(3)" style="flex:2;">
+              Continue →
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ── Step 4: Vibes & Cuisines ── -->
+        <div class="onboarding-step" id="step-4" style="display:none;">
+          <h3 style="margin-bottom:0.375rem;">Your vibe & favourites</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem;
+                    margin-bottom:1.5rem;">
+            Pick as many as you like
+          </p>
+
+          <!-- vibes -->
+          <div class="form-group">
+            <label class="form-label">Restaurant vibes you love</label>
+            <div class="vibe-grid">
+              {% set vibes = [
+                'Rooftop', 'Cozy', 'Quiet', 'Loud & Fun',
+                'Romantic', 'Family-friendly', 'Work-friendly',
+                'Instagrammable', 'Street-side', 'Late-night',
+                'Pet-friendly', 'Luxury'
+              ] %}
+              {% for vibe in vibes %}
+                <div class="vibe-chip" data-vibe="{{ vibe }}"
+                     onclick="toggleVibe(this)">
+                  {{ vibe }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- hidden vibes input -->
+          <input type="hidden" name="vibes" id="vibes-input" value="[]" />
+
+          <!-- cuisines -->
+          <div class="form-group" style="margin-top:1.25rem;">
+            <label class="form-label">Cuisines you love</label>
+            <div class="vibe-grid">
+              {% set cuisines = [
+                'Indian', 'Chinese', 'Italian', 'Continental',
+                'Japanese', 'Thai', 'Mexican', 'Street Food',
+                'Seafood', 'Desserts', 'Cafe', 'Fast Food'
+              ] %}
+              {% for cuisine in cuisines %}
+                <div class="vibe-chip cuisine-chip" data-cuisine="{{ cuisine }}"
+                     onclick="toggleCuisine(this)">
+                  {{ cuisine }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- hidden cuisines input -->
+          <input type="hidden" name="cuisines" id="cuisines-input" value="[]" />
+
+          <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+            <button type="button" class="btn btn-outline"
+                    onclick="prevStep(4)" style="flex:1;">
+              ← Back
+            </button>
+            <button type="button" class="btn btn-primary"
+                    onclick="nextStep(4)" style="flex:2;">
+              Continue →
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ── Step 5: Review & Submit ── -->
+        <div class="onboarding-step" id="step-5" style="display:none;">
+          <h3 style="margin-bottom:0.375rem;">You're all set! 🎉</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem;
+                    margin-bottom:1.5rem;">
+            Here's your food profile summary
+          </p>
+
+          <!-- summary -->
+          <div style="
+            background: rgba(47,82,51,0.05);
+            border: 1px solid rgba(47,82,51,0.15);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            margin-bottom:1.5rem;
+          ">
+            <div id="profile-summary" style="
+              display:flex;
+              flex-direction:column;
+              gap:0.75rem;
+              font-size:0.875rem;
+              color:var(--text-secondary);
+            ">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.75rem;">
+            <button type="button" class="btn btn-outline"
+                    onclick="prevStep(5)" style="flex:1;">
+              ← Back
+            </button>
+            <button type="submit" class="btn btn-primary"
+                    style="flex:2; font-size:1rem;">
+              Create My Profile 🍴
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- login link -->
+    <div style="text-align:center; margin-top:1.5rem; font-size:0.875rem;">
+      <span style="color:var(--text-muted);">Already have an account?</span>
+      <a href="{{ url_for('auth.login') }}"
+         style="color:var(--pine-green); font-weight:700; margin-left:0.25rem;">
+        Sign in
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block styles %}
+<style>
+  .diet-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.875rem 0.5rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .diet-card:hover {
+    border-color: var(--pine-green);
+    color: var(--pine-green);
+  }
+
+  .diet-card.selected {
+    background: var(--pine-green);
+    border-color: var(--pine-green);
+    color: var(--cream);
+  }
+
+  .budget-option {
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .budget-option:hover {
+    border-color: var(--pine-green);
+  }
+
+  .budget-option.selected {
+    border-color: var(--pine-green);
+    background: rgba(47,82,51,0.05);
+  }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  let currentStep = 1
+  const totalSteps = 5
+
+  // selected values
+  let selectedDiet = 'non-veg'
+  let selectedVibes = []
+  let selectedCuisines = []
+  let selectedBudgetMin = 100
+  let selectedBudgetMax = 300
+
+
+  // ── Step navigation ──
+  function nextStep(from) {
+    if (from === 1) {
+      const name = document.getElementById('name').value.trim()
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value.trim()
+      if (!name || !email || !password) {
+        alert('Please fill in all fields')
+        return
+      }
+    }
+
+    document.getElementById(`step-${from}`).style.display = 'none'
+    document.getElementById(`step-${from + 1}`).style.display = 'block'
+    currentStep = from + 1
+    updateDots()
+
+    if (from + 1 === 5) buildSummary()
+  }
+
+  function prevStep(from) {
+    document.getElementById(`step-${from}`).style.display = 'none'
+    document.getElementById(`step-${from - 1}`).style.display = 'block'
+    currentStep = from - 1
+    updateDots()
+  }
+
+  function updateDots() {
+    for (let i = 1; i <= totalSteps; i++) {
+      const dot = document.getElementById(`dot-${i}`)
+      dot.classList.remove('active', 'done')
+      if (i < currentStep) dot.classList.add('done')
+      if (i === currentStep) dot.classList.add('active')
+    }
+  }
+
+
+  // ── Diet selection ──
+  function selectDiet(el, value) {
+    document.querySelectorAll('.diet-card').forEach(c => {
+      c.classList.remove('selected')
+    })
+    el.classList.add('selected')
+    selectedDiet = value
+
+    // set radio
+    document.querySelector(`input[value="${value}"]`).checked = true
+  }
+
+
+  // ── Budget selection ──
+  function selectBudget(el) {
+    document.querySelectorAll('.budget-option').forEach(o => {
+      o.classList.remove('selected')
+    })
+    el.classList.add('selected')
+    selectedBudgetMin = parseInt(el.dataset.min)
+    selectedBudgetMax = parseInt(el.dataset.max)
+    document.getElementById('budget-min').value = selectedBudgetMin
+    document.getElementById('budget-max').value = selectedBudgetMax
+  }
+
+
+  // ── Vibe toggle ──
+  function toggleVibe(el) {
+    el.classList.toggle('selected')
+    const vibe = el.dataset.vibe
+
+    if (el.classList.contains('selected')) {
+      if (!selectedVibes.includes(vibe)) selectedVibes.push(vibe)
+    } else {
+      selectedVibes = selectedVibes.filter(v => v !== vibe)
+    }
+
+    document.getElementById('vibes-input').value = JSON.stringify(selectedVibes)
+  }
+
+
+  // ── Cuisine toggle ──
+  function toggleCuisine(el) {
+    el.classList.toggle('selected')
+    const cuisine = el.dataset.cuisine
+
+    if (el.classList.contains('selected')) {
+      if (!selectedCuisines.includes(cuisine)) selectedCuisines.push(cuisine)
+    } else {
+      selectedCuisines = selectedCuisines.filter(c => c !== cuisine)
+    }
+
+    document.getElementById('cuisines-input').value = JSON.stringify(selectedCuisines)
+  }
+
+
+  // ── Build summary for step 5 ──
+  function buildSummary() {
+    const name     = document.getElementById('name').value
+    const city     = document.getElementById('city').value
+    const spice    = document.getElementById('spice-slider').value
+
+    const rows = [
+      { icon: '👤', label: 'Name',       value: name },
+      { icon: '📍', label: 'City',       value: city },
+      { icon: '🥗', label: 'Diet',       value: selectedDiet },
+      { icon: '🌶️', label: 'Spice',      value: `${spice}/10` },
+      { icon: '💰', label: 'Budget',     value: `₹${selectedBudgetMin}–₹${selectedBudgetMax}/person` },
+      { icon: '✨', label: 'Vibes',      value: selectedVibes.length > 0 ? selectedVibes.join(', ') : 'None selected' },
+      { icon: '🍽️', label: 'Cuisines',   value: selectedCuisines.length > 0 ? selectedCuisines.join(', ') : 'None selected' },
+    ]
+
+    document.getElementById('profile-summary').innerHTML = rows.map(r => `
+      <div style="display:flex; gap:0.75rem; align-items:flex-start;">
+        <span style="flex-shrink:0;">${r.icon}</span>
+        <div>
+          <span style="font-weight:600; color:var(--text-primary);">
+            ${r.label}:
+          </span>
+          ${r.value}
+        </div>
+      </div>
+    `).join('')
+  }
+
+</script>
+{% endblock %}

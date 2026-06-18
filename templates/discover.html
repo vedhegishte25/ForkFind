@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Discover{% endblock %}
+
+{% block content %}
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <div class="container">
+    <h1>What's your mood?</h1>
+    <p>Tell us how you feel. We'll find the perfect place.</p>
+  </div>
+</div>
+
+
+<!-- ── Context Strip ── -->
+<div class="container" style="margin-bottom:1rem;">
+  <div style="
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.875rem 1.25rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    flex-wrap: wrap;
+  ">
+
+    <div class="context-item">
+      {% if context.weather == 'rainy' %}🌧️
+      {% elif context.weather == 'sunny' %}☀️
+      {% elif context.weather == 'cloudy' %}☁️
+      {% else %}🌤️{% endif %}
+      {{ context.weather | capitalize }}
+    </div>
+
+    <div class="context-item">
+      🕐 {{ context.time_of_day | replace('_',' ') | capitalize }}
+    </div>
+
+    <!-- city input -->
+    <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+      <span style="font-size:0.8rem; color:var(--text-muted);">📍</span>
+      <input
+        type="text"
+        id="city-input"
+        class="form-control"
+        value="{{ current_user.city or 'Thane' }}"
+        style="width:140px; padding:0.375rem 0.75rem; font-size:0.875rem;"
+        placeholder="Your city"
+      />
+    </div>
+
+    <!-- location indicator -->
+    <div id="location-indicator"
+         style="font-size:0.75rem; color:var(--text-muted);">
+      📍 Detecting location...
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ── Mood Grid ── -->
+<div class="container">
+  <div class="section-title">Pick your mood</div>
+  <div class="section-subtitle">
+    ForkFind will match restaurants to how you feel right now
+  </div>
+
+  <div class="mood-grid">
+    {% for mood in moods %}
+      <div class="mood-card"
+           data-mood-id="{{ mood.id }}"
+           data-mood-label="{{ mood.label }}">
+        <span class="mood-emoji">{{ mood.emoji }}</span>
+        <div class="mood-label">{{ mood.label }}</div>
+        <div class="mood-desc">{{ mood.description }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+
+  <!-- ── Find Button ── -->
+  <div style="text-align:center; margin-top:1.5rem;">
+    <button
+      id="find-btn"
+      class="btn btn-primary btn-lg"
+      style="
+        opacity:0.4;
+        pointer-events:none;
+        transform:translateY(8px);
+        transition:all 0.3s ease;
+        min-width:220px;
+      ">
+      🍴 Find My Place
+    </button>
+    <div style="font-size:0.75rem; color:var(--text-muted);
+                margin-top:0.75rem;">
+      Select a mood above to continue
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Results Section ── -->
+<div class="container" id="results-section"
+     style="display:none; margin-top:2.5rem;">
+
+  <div style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom:1.25rem;
+    flex-wrap:wrap;
+    gap:0.75rem;
+  ">
+    <div>
+      <div class="section-title" id="results-title">
+        Recommendations for you
+      </div>
+      <div class="section-subtitle" style="margin-bottom:0;">
+        Matched to your mood, profile and current context
+      </div>
+    </div>
+    <button
+      onclick="document.getElementById('results-section').style.display='none'"
+      style="background:none; border:none; color:var(--text-muted);
+             cursor:pointer; font-size:0.875rem;">
+      ✕ Clear
+    </button>
+  </div>
+
+  <!-- results render here -->
+  <div id="results-container"></div>
+
+</div>
+
+
+<!-- ── Mood Tips ── -->
+<div class="container" style="margin-top:3rem; margin-bottom:2rem;">
+  <div class="section-title">How ForkFind works</div>
+  <div class="grid-3" style="margin-top:1rem;">
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+      text-align:center;
+    ">
+      <div style="font-size:2rem; margin-bottom:0.75rem;">🎭</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        Pick your mood
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Not a cuisine. How you actually feel right now.
+      </div>
+    </div>
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+      text-align:center;
+    ">
+      <div style="font-size:2rem; margin-bottom:0.75rem;">🤖</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        AI matches for you
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Considers your profile, weather, time and budget.
+      </div>
+    </div>
+
+    <div style="
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:1.25rem;
+      text-align:center;
+    ">
+      <div style="font-size:2rem; margin-bottom:0.75rem;">📍</div>
+      <div style="font-weight:700; margin-bottom:0.375rem;
+                  color:var(--text-primary);">
+        Discover nearby
+      </div>
+      <div style="font-size:0.825rem; color:var(--text-muted);">
+        Real restaurants near you, sorted by fit.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/discover.js') }}"></script>
+<script>
+  // handle pre-selected mood from home page quick picks
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search)
+    const moodId = params.get('mood')
+    const moodLabel = params.get('label')
+
+    if (moodId && moodLabel) {
+      const card = document.querySelector(
+        `.mood-card[data-mood-id="${moodId}"]`
+      )
+      if (card) {
+        card.click()
+        setTimeout(() => {
+          document.getElementById('find-btn')?.click()
+        }, 300)
+      }
+    }
+  })
+</script>
+{% endblock %}
