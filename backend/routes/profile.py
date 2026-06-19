@@ -160,3 +160,17 @@ def upload_avatar():
     db.session.commit()
 
     return jsonify({'message': 'Avatar updated', 'avatar': avatar_data})
+
+@profile.route('/set-preset-avatar', methods=['POST'])
+@login_required
+def set_preset_avatar():
+    data = request.get_json()
+    avatar_url = data.get('avatar_url')
+
+    if not avatar_url or 'dicebear.com' not in avatar_url:
+        return jsonify({'error': 'Invalid avatar'}), 400
+
+    current_user.avatar = avatar_url
+    db.session.commit()
+
+    return jsonify({'message': 'Avatar updated', 'avatar': avatar_url})

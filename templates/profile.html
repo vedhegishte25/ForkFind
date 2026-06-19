@@ -52,6 +52,52 @@
         </div>
       </div>
       <input type="file" id="avatar-upload-input" accept="image/*" style="display:none;" />
+      <div style="display:flex; flex-direction:column; gap:0.25rem;">
+  <button
+    type="button"
+    onclick="openAvatarGallery()"
+    style="
+      background:none; border:none; cursor:pointer;
+      font-size:0.75rem; color:var(--sky-blue);
+      font-weight:600; text-decoration:underline;
+      padding:0;
+    ">
+    Choose animated avatar
+  </button>
+</div>
+
+<div id="avatar-gallery-modal" style="
+  display:none;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.5);
+  z-index:9999;
+  align-items:center; justify-content:center;
+  padding:1rem;
+">
+  <div style="
+    background:#fff;
+    border-radius:var(--radius-xl);
+    padding:1.5rem;
+    width:100%; max-width:480px;
+    max-height:80vh;
+    overflow-y:auto;
+  ">
+    <div style="display:flex; justify-content:space-between;
+                align-items:center; margin-bottom:1rem;">
+      <h3 style="color:var(--text-primary);">Choose your avatar</h3>
+      <button onclick="closeAvatarGallery()"
+              style="background:none; border:none; font-size:1.25rem;
+                     cursor:pointer; color:var(--text-muted);">✕</button>
+    </div>
+
+    <div id="avatar-gallery-grid" style="
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:0.875rem;
+    ">
+    </div>
+  </div>
+</div>
 
       <div>
         <h1 style="color:var(--cream); margin-bottom:0.25rem;">
@@ -500,7 +546,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/dna_chart.js') }}"></script>
-<script src="{{ url_for('static', filename='js/dna_chart.js') }}"></script>
 <script>
   document.getElementById('avatar-upload-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0]
@@ -550,8 +595,7 @@
     }
     reader.readAsDataURL(file)
   })
-</script>
-<script>
+
   function toggleEditForm() {
     const form = document.getElementById('edit-profile-form')
     form.style.display = form.style.display === 'none' ? 'block' : 'none'
