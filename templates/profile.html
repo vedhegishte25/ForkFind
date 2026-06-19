@@ -18,7 +18,7 @@
       <!-- avatar -->
       <div
         id="avatar-display"
-        onclick="document.getElementById('avatar-upload-input').click()"
+        onclick="openAvatarGallery()"
         style="
           width:72px; height:72px;
           border-radius:50%;
@@ -52,19 +52,6 @@
         </div>
       </div>
       <input type="file" id="avatar-upload-input" accept="image/*" style="display:none;" />
-      <div style="display:flex; flex-direction:column; gap:0.25rem;">
-  <button
-    type="button"
-    onclick="openAvatarGallery()"
-    style="
-      background:none; border:none; cursor:pointer;
-      font-size:0.75rem; color:var(--sky-blue);
-      font-weight:600; text-decoration:underline;
-      padding:0;
-    ">
-    Choose animated avatar
-  </button>
-</div>
 
 <div id="avatar-gallery-modal" style="
   display:none;
@@ -89,12 +76,21 @@
               style="background:none; border:none; font-size:1.25rem;
                      cursor:pointer; color:var(--text-muted);">✕</button>
     </div>
-
-    <div id="avatar-gallery-grid" style="
+<div id="avatar-gallery-grid" style="
       display:grid;
       grid-template-columns:repeat(4, 1fr);
       gap:0.875rem;
+      margin-bottom:1rem;
     ">
+    </div>
+
+    <div style="border-top:1px solid var(--border); padding-top:1rem; text-align:center;">
+      <button
+        type="button"
+        onclick="document.getElementById('avatar-upload-input').click()"
+        class="btn btn-outline btn-sm">
+        📷 Upload your own photo instead
+      </button>
     </div>
   </div>
 </div>
@@ -547,6 +543,93 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/dna_chart.js') }}"></script>
 <script>
+  const AVATAR_SEEDS = [
+    { seed: 'Aiden',   style: 'adventurer' },
+    { seed: 'Priya',   style: 'adventurer' },
+    { seed: 'Rohan',   style: 'avataaars' },
+    { seed: 'Ananya',  style: 'avataaars' },
+    { seed: 'Kabir',   style: 'adventurer' },
+    { seed: 'Meera',   style: 'adventurer' },
+    { seed: 'Vikram',  style: 'avataaars' },
+    { seed: 'Diya',    style: 'avataaars' },
+    { seed: 'Arjun',   style: 'adventurer' },
+    { seed: 'Ishita',  style: 'adventurer' },
+    { seed: 'Karan',   style: 'avataaars' },
+    { seed: 'Sanya',   style: 'avataaars' },
+  ]
+
+  function buildAvatarUrl(style, seed) {
+    return `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`
+  }
+
+  function openAvatarGallery() {
+    const grid = document.getElementById('avatar-gallery-grid')
+    grid.innerHTML = AVATAR_SEEDS.map(a => {
+      const url = buildAvatarUrl(a.style, a.seed)
+      return `
+        <div
+          onclick="selectPresetAvatar('${url}')"
+          style="
+            cursor:pointer;
+            border:2px solid var(--border);
+            border-radius:var(--radius-lg);
+            padding:0.5rem;
+            text-align:center;
+            transition:all 0.2s ease;
+          "
+          onmouseover="this.style.borderColor='var(--pine-green)'"
+          onmouseout="this.style.borderColor='var(--border)'"
+        >
+          <img src="${url}" alt="${a.seed}"
+               style="width:100%; aspect-ratio:1; border-radius:50%;
+                      background:var(--warm-light);" />
+          <div style="font-size:0.7rem; color:var(--text-muted);
+                      margin-top:0.375rem;">${a.seed}</div>
+        </div>
+      `
+    }).join('')
+
+    document.getElementById('avatar-gallery-modal').style.display = 'flex'
+  }
+
+  function closeAvatarGallery() {
+    document.getElementById('avatar-gallery-modal').style.display = 'none'
+  }
+
+  async function selectPresetAvatar(url) {
+    try {
+      await apiFetch('/profile/set-preset-avatar', {
+        method: 'POST',
+        body: JSON.stringify({ avatar_url: url })
+      })
+
+      const avatarEl = document.getElementById('avatar-display')
+      avatarEl.style.backgroundImage = `url(${url})`
+      avatarEl.style.backgroundSize = 'cover'
+      avatarEl.style.backgroundPosition = 'center'
+      avatarEl.innerHTML = `
+        <div style="
+          position:absolute; inset:0;
+          background:rgba(0,0,0,0.35);
+          display:flex; align-items:center; justify-content:center;
+          opacity:0; transition:opacity 0.2s ease;
+          font-size:0.7rem; color:#fff; font-weight:600;
+        " class="avatar-overlay">
+          Change
+        </div>
+      `
+
+      closeAvatarGallery()
+      showToast('Avatar updated!', 'success')
+
+    } catch (error) {
+      // error toast already shown by apiFetch
+    }
+  }
+
+  document.getElementById('avatar-gallery-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'avatar-gallery-modal') closeAvatarGallery()
+  })
   document.getElementById('avatar-upload-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0]
     if (!file) return
