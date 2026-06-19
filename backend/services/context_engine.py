@@ -102,19 +102,92 @@ def get_festival(now):
     month = now.month
     day = now.day
 
+def get_festival(now):
+    month = now.month
+    day = now.day
+
     festivals = {
         (1, 1): 'New Year',
         (1, 14): 'Makar Sankranti',
         (3, 25): 'Holi',
         (8, 15): 'Independence Day',
+        (8, 19): 'Raksha Bandhan',
+        (9, 7): 'Ganesh Chaturthi',
         (10, 2): 'Gandhi Jayanti',
+        (10, 12): 'Dussehra',
         (10, 24): 'Diwali',
+        (10, 25): 'Diwali',
         (11, 1): 'Diwali',
         (12, 25): 'Christmas',
         (12, 31): 'New Year Eve',
     }
 
     return festivals.get((month, day), None)
+
+
+FESTIVAL_FOOD_SUGGESTIONS = {
+    'New Year': {
+        'cuisines': ['Continental', 'Italian'],
+        'message': 'Ring in the new year with celebratory dining',
+        'icon': '🎊'
+    },
+    'Makar Sankranti': {
+        'cuisines': ['Street Food', 'Desserts'],
+        'message': 'Try til-gud sweets and seasonal festive treats',
+        'icon': '🪁'
+    },
+    'Holi': {
+        'cuisines': ['Street Food', 'Desserts', 'Indian'],
+        'message': 'Gujiya, thandai and festive Holi specials are calling',
+        'icon': '🎨'
+    },
+    'Raksha Bandhan': {
+        'cuisines': ['Desserts', 'Indian'],
+        'message': 'Sweet shops are stocked up for the occasion',
+        'icon': '🎀'
+    },
+    'Ganesh Chaturthi': {
+        'cuisines': ['Indian', 'Street Food', 'Desserts'],
+        'message': 'Modak season — find the best ones near you',
+        'icon': '🐘'
+    },
+    'Dussehra': {
+        'cuisines': ['Indian', 'Street Food'],
+        'message': 'Festive thalis and street food fairs are in full swing',
+        'icon': '🏹'
+    },
+    'Diwali': {
+        'cuisines': ['Desserts', 'Indian'],
+        'message': 'Special Diwali menus and mithai are everywhere',
+        'icon': '🪔'
+    },
+    'Christmas': {
+        'cuisines': ['Continental', 'Desserts'],
+        'message': 'Festive Christmas specials and cakes are in season',
+        'icon': '🎄'
+    },
+    'New Year Eve': {
+        'cuisines': ['Continental', 'Italian'],
+        'message': 'Book ahead — NYE spots fill up fast',
+        'icon': '🎆'
+    },
+    'Independence Day': {
+        'cuisines': ['Indian', 'Street Food'],
+        'message': 'Tricolour-themed menus at many restaurants today',
+        'icon': '🇮🇳'
+    },
+    'Gandhi Jayanti': {
+        'cuisines': ['Indian'],
+        'message': 'Many restaurants offer simple, traditional thalis today',
+        'icon': '🕊️'
+    },
+}
+
+
+def get_festival_suggestion(festival_name):
+    if not festival_name:
+        return None
+    return FESTIVAL_FOOD_SUGGESTIONS.get(festival_name)
 
 
 def get_context_recommendation(context):

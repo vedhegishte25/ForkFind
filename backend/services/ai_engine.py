@@ -1,149 +1,203 @@
-import anthropic
-import json
-from config import Config
+import random
+from backend.services.mock_data import MOOD_TO_CUISINE, MOOD_TO_VIBE
 
-client = anthropic.Anthropic(api_key=Config.ANTHROPIC_API_KEY)
+# ── Mock AI Engine — no API calls, zero cost ──
+# Same function signatures as the real version.
+# Swap this file out later when ready to use real Anthropic API.
+
+MOOD_MESSAGES = {
+    'comfort': [
+        "Sounds like you need something warm and familiar today.",
+        "Comfort food coming right up — these spots feel like home."
+    ],
+    'date_night': [
+        "Setting the mood with some romantic picks for tonight.",
+        "These spots have the perfect ambience for date night."
+    ],
+    'celebration': [
+        "Time to celebrate! Here are some places worth the occasion.",
+        "Big moments deserve big flavours — check these out."
+    ],
+    'late_night': [
+        "Late night cravings hit different. Here's what's open.",
+        "Found some solid late night spots still serving."
+    ],
+    'family': [
+        "Family friendly spots with something for everyone.",
+        "Spacious, welcoming places perfect for the whole family."
+    ],
+    'solo_work': [
+        "Quiet corners with good wifi and better coffee.",
+        "Perfect spots to get work done with a great cup of coffee."
+    ],
+    'rainy_day': [
+        "Rainy day calls for something warm and cozy.",
+        "Perfect weather for soup, chai and comfort."
+    ],
+    'hangover': [
+        "We've got you. Heavy, greasy and exactly what you need.",
+        "Recovery mode activated — these will fix you right up."
+    ],
+    'healthy': [
+        "Fresh, light and nutritious options for a clean day.",
+        "Healthy doesn't mean boring — check these out."
+    ],
+    'cheat_meal': [
+        "No regrets today. Full send, here we go.",
+        "Cheat day rules apply — these are worth every bite."
+    ],
+}
 
 
 def get_mood_recommendations(mood, user_prefs, context, city):
-    prompt = f"""
-You are ForkFind's AI food matchmaker. A user in {city} wants restaurant recommendations.
+    """
+    Mock version — generates realistic looking recommendations
+    using rule based logic instead of calling Claude API.
+    """
 
-User Mood: {mood}
+    # find mood_id from mood label
+    mood_id = None
+    for key in MOOD_TO_CUISINE.keys():
+        if key.replace('_', ' ') in mood.lower() or key in mood.lower():
+            mood_id = key
+            break
 
-User Food Profile:
-- Spice tolerance: {user_prefs.get('spice_tolerance', 5)}/10
-- Diet type: {user_prefs.get('diet_type', 'non-veg')}
-- Budget: ₹{user_prefs.get('budget_min', 200)} - ₹{user_prefs.get('budget_max', 800)} per person
-- Preferred vibes: {', '.join(user_prefs.get('preferred_vibes', []))}
-- Favourite cuisines: {', '.join(user_prefs.get('favourite_cuisines', []))}
-- Food DNA: {json.dumps(user_prefs.get('food_dna', {}))}
+    if not mood_id:
+        mood_id = 'comfort'
 
-Current Context:
-- Weather: {context.get('weather', 'unknown')}
-- Time of day: {context.get('time_of_day', 'unknown')}
-- Day type: {context.get('day_type', 'weekday')}
+    cuisines = MOOD_TO_CUISINE.get(mood_id, ['Indian', 'Continental'])
+    vibes = MOOD_TO_VIBE.get(mood_id, ['casual', 'cozy'])
 
-Based on the mood, user profile and context, respond ONLY with a JSON object:
-{{
-    "message": "A warm, personal 1-2 sentence message about why these suggestions fit right now",
-    "cuisines": ["cuisine1", "cuisine2", "cuisine3"],
-    "vibes": ["vibe1", "vibe2"],
-    "search_query": "best [cuisine] restaurant in {city} for [mood]"
-}}
+    messages = MOOD_MESSAGES.get(mood_id, ["Here are some great picks for you."])
+    message = random.choice(messages)
 
-Be specific, personal and accurate. Match the mood perfectly.
-"""
+    # personalize message slightly using user prefs
+    if user_prefs.get('diet_type') == 'veg':
+        message += " All filtered for vegetarian options."
+    elif user_prefs.get('diet_type') == 'vegan':
+        message += " Vegan friendly spots included."
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    if context.get('weather') == 'rainy' and mood_id != 'rainy_day':
+        message += " Also factored in the rain outside."
 
-    try:
-        text = response.content[0].text
-        clean = text.replace('```json', '').replace('```', '').strip()
-        return json.loads(clean)
-    except Exception:
-        return {
-            "message": f"Perfect picks for your {mood} mood!",
-            "cuisines": ["Indian", "Continental"],
-            "vibes": ["cozy", "casual"],
-            "search_query": f"{mood} restaurant in {city}"
-        }
+    return {
+        "message": message,
+        "cuisines": cuisines[:3],
+        "vibes": vibes[:2],
+        "search_query": f"{mood} restaurant in {city}",
+        "mood_id": mood_id
+    }
 
 
 def solve_group_decision(preferences, city):
-    prefs_text = json.dumps(preferences, indent=2)
+    """
+    Mock version — finds overlap in group preferences using
+    simple rule based logic instead of calling Claude API.
+    """
 
-    prompt = f"""
-You are ForkFind's Group Decision Solver. A group of friends in {city} can't decide where to eat.
+    all_cuisines = []
+    all_vibes = []
+    all_budgets = []
+    all_dietary = []
 
-Here are everyone's preferences:
-{prefs_text}
+    for user_id, prefs in preferences.items():
+        all_cuisines.extend(prefs.get('cuisines', []))
+        all_vibes.extend(prefs.get('vibes', []))
+        all_budgets.append(prefs.get('budget', 500))
+        all_dietary.append(prefs.get('dietary', 'non-veg'))
 
-Find the best common ground for the entire group. Respond ONLY with a JSON object:
-{{
-    "message": "A fun, friendly 2 sentence explanation of how you found common ground",
-    "common_cuisines": ["cuisine1", "cuisine2"],
-    "budget_range": "₹X - ₹Y per person",
-    "vibes": ["vibe1", "vibe2"],
-    "dietary_notes": "any dietary restrictions to keep in mind",
-    "search_query": "best restaurant in {city} for groups"
-}}
+    # find most common cuisines
+    cuisine_counts = {}
+    for c in all_cuisines:
+        cuisine_counts[c] = cuisine_counts.get(c, 0) + 1
+    common_cuisines = sorted(
+        cuisine_counts, key=cuisine_counts.get, reverse=True
+    )[:3]
 
-Make sure dietary restrictions are respected. Find genuine overlap, not just a compromise.
-"""
+    if not common_cuisines:
+        common_cuisines = ['Indian', 'Continental']
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    # find most common vibes
+    vibe_counts = {}
+    for v in all_vibes:
+        vibe_counts[v] = vibe_counts.get(v, 0) + 1
+    common_vibes = sorted(
+        vibe_counts, key=vibe_counts.get, reverse=True
+    )[:2]
 
-    try:
-        text = response.content[0].text
-        clean = text.replace('```json', '').replace('```', '').strip()
-        return json.loads(clean)
-    except Exception:
-        return {
-            "message": "Found some great options everyone will enjoy!",
-            "common_cuisines": ["Indian", "Continental"],
-            "budget_range": "₹300 - ₹600 per person",
-            "vibes": ["casual", "family-friendly"],
-            "dietary_notes": "vegetarian options available",
-            "search_query": f"group restaurant in {city}"
-        }
+    if not common_vibes:
+        common_vibes = ['casual', 'family-friendly']
+
+    # budget range covering everyone
+    min_budget = min(all_budgets) if all_budgets else 300
+    max_budget = max(all_budgets) if all_budgets else 800
+    budget_range = f"₹{min_budget}–₹{max_budget} per person"
+
+    # dietary notes
+    dietary_notes = "Mixed dietary preferences — vegetarian options recommended"
+    if all(d == 'veg' for d in all_dietary):
+        dietary_notes = "Everyone prefers vegetarian"
+    elif all(d == 'non-veg' for d in all_dietary):
+        dietary_notes = "Everyone is okay with non-vegetarian"
+    elif 'vegan' in all_dietary:
+        dietary_notes = "Vegan options needed — choose accordingly"
+
+    messages = [
+        f"Found great overlap! Everyone seems to enjoy {common_cuisines[0]} food.",
+        f"Based on everyone's picks, {common_cuisines[0]} feels like a safe win for the group.",
+        "Balanced things out so nobody has to compromise too much."
+    ]
+
+    return {
+        "message": random.choice(messages),
+        "common_cuisines": common_cuisines,
+        "budget_range": budget_range,
+        "vibes": common_vibes,
+        "dietary_notes": dietary_notes,
+        "search_query": f"{common_cuisines[0]} restaurant in {city}"
+    }
 
 
 def analyze_review_sentiment(review_text):
-    prompt = f"""
-Analyze the sentiment of this restaurant review and respond with ONLY one word:
-positive, neutral, or negative.
+    """
+    Mock version — simple keyword based sentiment instead
+    of calling Claude API.
+    """
 
-Review: {review_text}
-"""
+    text = review_text.lower()
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=10,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    positive_words = [
+        'great', 'amazing', 'love', 'excellent', 'awesome',
+        'delicious', 'best', 'good', 'fantastic', 'perfect',
+        'wonderful', 'tasty', 'recommend', 'friendly'
+    ]
+    negative_words = [
+        'bad', 'terrible', 'worst', 'awful', 'poor', 'slow',
+        'rude', 'disappointing', 'cold', 'overpriced', 'dirty'
+    ]
 
-    sentiment = response.content[0].text.strip().lower()
-    if sentiment not in ['positive', 'neutral', 'negative']:
+    pos_count = sum(1 for w in positive_words if w in text)
+    neg_count = sum(1 for w in negative_words if w in text)
+
+    if pos_count > neg_count:
         return 'positive'
-    return sentiment
+    elif neg_count > pos_count:
+        return 'negative'
+    else:
+        return 'neutral'
 
 
 def detect_restaurant_vibe(name, address, reviews_text):
-    prompt = f"""
-You are ForkFind's Vibe Detection AI.
+    """
+    Mock version — picks plausible vibe tags randomly
+    instead of calling Claude API.
+    """
 
-Restaurant: {name}
-Address: {address}
-Sample reviews: {reviews_text[:500]}
+    all_vibes = [
+        'romantic', 'luxury', 'cozy', 'family-friendly', 'loud',
+        'instagrammable', 'work-friendly', 'pet-friendly', 'rooftop',
+        'street-side', 'casual', 'fine-dining', 'late-night',
+        'brunch-spot', 'hidden-gem'
+    ]
 
-Based on this information, identify the top 3 vibe tags for this restaurant.
-Choose ONLY from these options:
-romantic, luxury, cozy, family-friendly, loud, instagrammable, 
-work-friendly, pet-friendly, rooftop, street-side, casual, fine-dining,
-late-night, brunch-spot, hidden-gem
-
-Respond ONLY with a JSON array:
-["vibe1", "vibe2", "vibe3"]
-"""
-
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=100,
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    try:
-        text = response.content[0].text
-        clean = text.replace('```json', '').replace('```', '').strip()
-        return json.loads(clean)
-    except Exception:
-        return ['casual', 'cozy', 'family-friendly']
+    return random.sample(all_vibes, k=3)

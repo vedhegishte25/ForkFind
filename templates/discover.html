@@ -26,7 +26,7 @@
     flex-wrap: wrap;
   ">
 
-    <div class="context-item">
+    <div class="context-item" style="color: var(--text-secondary);">
       {% if context.weather == 'rainy' %}🌧️
       {% elif context.weather == 'sunny' %}☀️
       {% elif context.weather == 'cloudy' %}☁️
@@ -34,7 +34,7 @@
       {{ context.weather | capitalize }}
     </div>
 
-    <div class="context-item">
+    <div class="context-item" style="color: var(--text-secondary);">
       🕐 {{ context.time_of_day | replace('_',' ') | capitalize }}
     </div>
 

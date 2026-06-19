@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from backend.models.food_profile import FoodProfile
 from backend.services.ai_engine import get_mood_recommendations
-from backend.services.context_engine import get_current_context
+from backend.services.context_engine import get_current_context, get_festival_suggestion
 from backend.services.places_service import search_restaurants
 
 discover = Blueprint('discover', __name__)
@@ -46,6 +46,10 @@ def mood_recommend():
     # get current context
     context = get_current_context(city)
 
+    # boost with festival cuisines if a festival is active
+    festival_suggestion = get_festival_suggestion(context.get('festival'))
+
+
     # build user preferences dict
     user_prefs = {}
     if food_profile:
@@ -66,6 +70,14 @@ def mood_recommend():
         context=context,
         city=city
     )
+    # blend in festival cuisines if active
+    if festival_suggestion:
+        existing_cuisines = ai_suggestions.get('cuisines', [])
+        for c in festival_suggestion['cuisines']:
+            if c not in existing_cuisines:
+                existing_cuisines.insert(0, c)
+        ai_suggestions['cuisines'] = existing_cuisines[:3]
+        ai_suggestions['message'] = f"{festival_suggestion['icon']} {festival_suggestion['message']}. " + ai_suggestions.get('message', '')
 
     # search real restaurants from Google Places
     restaurants = search_restaurants(

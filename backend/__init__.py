@@ -38,8 +38,69 @@ def create_app(config_name='default'):
     app.register_blueprint(challenges, url_prefix='/challenges')
     app.register_blueprint(main)
 
-    # create tables
+# create tables and seed default data
     with app.app_context():
         db.create_all()
+        seed_default_challenges()
 
     return app
+
+
+def seed_default_challenges():
+    from backend.models.challenge import Challenge
+
+    default_challenges = [
+        {
+            'name': 'Thane Explorer',
+            'description': 'Visit 10 unique restaurants across Thane.',
+            'badge_name': 'Thane Explorer',
+            'badge_icon': '🗺️',
+            'target_count': 10,
+            'challenge_type': 'unique_restaurants',
+            'criteria': '{}'
+        },
+        {
+            'name': 'Street Food Hunter',
+            'description': 'Try 20 street food spots in your city.',
+            'badge_name': 'Street Food Hunter',
+            'badge_icon': '🍢',
+            'target_count': 20,
+            'challenge_type': 'street_food',
+            'criteria': '{"cuisine": "street food"}'
+        },
+        {
+            'name': 'Dessert Master',
+            'description': 'Visit 15 dessert places and satisfy your sweet tooth.',
+            'badge_name': 'Dessert Master',
+            'badge_icon': '🍰',
+            'target_count': 15,
+            'challenge_type': 'desserts',
+            'criteria': '{"cuisine": "desserts"}'
+        },
+        {
+            'name': 'Cuisine Globetrotter',
+            'description': 'Try 8 different cuisines from around the world.',
+            'badge_name': 'Globetrotter',
+            'badge_icon': '🌍',
+            'target_count': 8,
+            'challenge_type': 'cuisines',
+            'criteria': '{}'
+        },
+        {
+            'name': 'Hidden Gem Finder',
+            'description': 'Discover and visit 5 hidden gem restaurants.',
+            'badge_name': 'Gem Finder',
+            'badge_icon': '💎',
+            'target_count': 5,
+            'challenge_type': 'hidden_gems',
+            'criteria': '{"is_hidden_gem": true}'
+        }
+    ]
+
+    for c in default_challenges:
+        existing = Challenge.query.filter_by(name=c['name']).first()
+        if not existing:
+            challenge = Challenge(**c)
+            db.session.add(challenge)
+
+    db.session.commit()

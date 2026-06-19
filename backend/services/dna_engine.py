@@ -162,3 +162,57 @@ def get_dna_insights(food_dna):
         insights.append("You never say no to dessert")
 
     return insights
+def compare_food_dna(dna_a, dna_b):
+    """
+    Compares two Food DNA profiles and returns an overlap score (0-100)
+    plus a breakdown of shared and unique cuisines.
+    """
+    if not dna_a or not dna_b:
+        return {
+            'overlap_score': 0,
+            'shared_cuisines': [],
+            'unique_to_a': list(dna_a.keys()) if dna_a else [],
+            'unique_to_b': list(dna_b.keys()) if dna_b else []
+        }
+
+    all_cuisines = set(list(dna_a.keys()) + list(dna_b.keys()))
+
+    overlap_sum = 0
+    shared_cuisines = []
+
+    for cuisine in all_cuisines:
+        val_a = dna_a.get(cuisine, 0)
+        val_b = dna_b.get(cuisine, 0)
+        overlap_sum += min(val_a, val_b)
+
+        if val_a > 0 and val_b > 0:
+            shared_cuisines.append({
+                'cuisine': cuisine,
+                'a_pct': val_a,
+                'b_pct': val_b
+            })
+
+    shared_cuisines.sort(key=lambda x: min(x['a_pct'], x['b_pct']), reverse=True)
+
+    unique_to_a = [c for c in dna_a.keys() if dna_b.get(c, 0) == 0]
+    unique_to_b = [c for c in dna_b.keys() if dna_a.get(c, 0) == 0]
+
+    return {
+        'overlap_score': round(overlap_sum),
+        'shared_cuisines': shared_cuisines,
+        'unique_to_a': unique_to_a,
+        'unique_to_b': unique_to_b
+    }
+
+
+def get_match_message(overlap_score):
+    if overlap_score >= 80:
+        return "You two basically share a stomach. Incredible match!"
+    elif overlap_score >= 60:
+        return "Strong food compatibility — you'd agree on most places."
+    elif overlap_score >= 40:
+        return "Decent overlap — some negotiation needed, but workable."
+    elif overlap_score >= 20:
+        return "Pretty different tastes — could be fun to explore together."
+    else:
+        return "Total opposites! You might just discover something new."

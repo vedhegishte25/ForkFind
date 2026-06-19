@@ -19,11 +19,6 @@
   <!-- Page Specific Styles -->
   {% block styles %}{% endblock %}
 
-  <style>
-    body {
-      padding-top: 64px;
-    }
-  </style>
 </head>
 
 <body
@@ -39,9 +34,15 @@
     <a href="{{ url_for('main.home') }}" class="navbar-brand">
       Fork<span>Find</span>
     </a>
+    <!-- hamburger toggle (mobile only) -->
+    <button class="navbar-toggle" id="navbar-toggle" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
     <!-- nav links -->
-    <ul class="navbar-nav">
+    <ul class="navbar-nav" id="navbar-nav">
       {% if current_user.is_authenticated %}
 
         <li>
@@ -108,6 +109,13 @@
     </ul>
 
   </nav>
+
+  <script>
+      document.getElementById('navbar-toggle')?.addEventListener('click', () => {
+      document.getElementById('navbar-nav')?.classList.toggle('open')
+      document.getElementById('navbar-toggle')?.classList.toggle('active')
+    })
+  </script>
 
   <!-- ── Flash Messages ── -->
   {% with messages = get_flashed_messages(with_categories=true) %}

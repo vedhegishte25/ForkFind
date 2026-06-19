@@ -48,6 +48,37 @@
   </div>
 </div>
 
+<!-- ── Festival Banner ── -->
+{% if festival_suggestion %}
+<div class="container" style="margin-top:1rem;">
+  <div style="
+    background: linear-gradient(135deg, var(--sand), var(--warm-light));
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-xl);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  ">
+    <div style="font-size: 2rem; flex-shrink: 0;">
+      {{ festival_suggestion.icon }}
+    </div>
+    <div style="flex: 1; min-width: 200px;">
+      <div style="font-weight: 800; color: var(--bark-brown); font-size: 1rem; margin-bottom: 0.25rem;">
+        {{ context.festival }} special
+      </div>
+      <div style="font-size: 0.875rem; color: var(--bark-brown); opacity: 0.85;">
+        {{ festival_suggestion.message }}
+      </div>
+    </div>
+    <a href="{{ url_for('discover.index') }}?mood=celebration&label=Celebration"
+       class="btn btn-warm">
+      Explore →
+    </a>
+  </div>
+</div>
+{% endif %}
 
 <!-- ── Hero ── -->
 <div class="container" style="padding-top:1rem;">

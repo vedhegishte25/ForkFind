@@ -4,7 +4,8 @@ from backend import db
 from backend.models.food_profile import FoodProfile
 from backend.models.review import Review
 from backend.models.challenge import UserChallenge
-from backend.services.dna_engine import update_food_dna
+from backend.models.user import User
+from backend.services.dna_engine import update_food_dna, get_dna_insights, compare_food_dna, get_match_message
 
 profile = Blueprint('profile', __name__)
 
@@ -19,6 +20,7 @@ def view_profile():
                                  .limit(5).all()
 
     food_dna = food_profile.get_food_dna() if food_profile else {}
+    insights = get_dna_insights(food_dna) if food_dna else []
     completed_challenges = [c for c in user_challenges if c.completed]
     active_challenges = [c for c in user_challenges if not c.completed]
 
@@ -26,6 +28,7 @@ def view_profile():
                            user=current_user,
                            food_profile=food_profile,
                            food_dna=food_dna,
+                           insights=insights,
                            completed_challenges=completed_challenges,
                            active_challenges=active_challenges,
                            recent_reviews=recent_reviews)
@@ -100,3 +103,60 @@ def refresh_dna():
         'message': 'Food DNA updated',
         'food_dna': updated_dna
     })
+
+
+@profile.route('/compare', methods=['POST'])
+@login_required
+def compare_dna():
+    data = request.get_json()
+    friend_email = data.get('email', '').strip().lower()
+
+    if not friend_email:
+        return jsonify({'error': 'Please enter an email'}), 400
+
+    friend = User.query.filter_by(email=friend_email).first()
+
+    if not friend:
+        return jsonify({'error': 'No ForkFind user found with that email'}), 404
+
+    if friend.id == current_user.id:
+        return jsonify({'error': 'You cannot compare with yourself'}), 400
+
+    my_profile = FoodProfile.query.filter_by(user_id=current_user.id).first()
+    friend_profile = FoodProfile.query.filter_by(user_id=friend.id).first()
+
+    my_dna = my_profile.get_food_dna() if my_profile else {}
+    friend_dna = friend_profile.get_food_dna() if friend_profile else {}
+
+    comparison = compare_food_dna(my_dna, friend_dna)
+    match_message = get_match_message(comparison['overlap_score'])
+
+    return jsonify({
+        'friend_name': friend.name,
+        'friend_dna': friend_dna,
+        'my_dna': my_dna,
+        'overlap_score': comparison['overlap_score'],
+        'shared_cuisines': comparison['shared_cuisines'],
+        'unique_to_a': comparison['unique_to_a'],
+        'unique_to_b': comparison['unique_to_b'],
+        'match_message': match_message
+    })
+
+
+@profile.route('/upload-avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    data = request.get_json()
+    avatar_data = data.get('avatar')
+
+    if not avatar_data:
+        return jsonify({'error': 'No image provided'}), 400
+
+    # basic size check — limit to ~2MB base64 string
+    if len(avatar_data) > 2_800_000:
+        return jsonify({'error': 'Image too large, please use a smaller photo'}), 400
+
+    current_user.avatar = avatar_data
+    db.session.commit()
+
+    return jsonify({'message': 'Avatar updated', 'avatar': avatar_data})

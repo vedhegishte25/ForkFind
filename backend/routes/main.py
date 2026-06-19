@@ -4,7 +4,7 @@ from backend.models.food_profile import FoodProfile
 from backend.models.restaurant import Restaurant
 from backend.models.review import Review
 from backend.models.challenge import UserChallenge
-from backend.services.context_engine import get_current_context, get_context_recommendation
+from backend.services.context_engine import get_current_context, get_context_recommendation, get_festival_suggestion
 from backend.services.dna_engine import get_dna_insights
 
 main = Blueprint('main', __name__)
@@ -30,6 +30,7 @@ def home():
     # get context
     context = get_current_context(current_user.city)
     recommendations = get_context_recommendation(context)
+    festival_suggestion = get_festival_suggestion(context.get('festival'))
 
     # get hidden gems
     gems = Restaurant.query.filter_by(
@@ -54,6 +55,7 @@ def home():
                            food_dna=food_dna,
                            context=context,
                            recommendations=recommendations,
+                           festival_suggestion=festival_suggestion,
                            gems=gems,
                            review_count=review_count,
                            badge_count=badge_count,
