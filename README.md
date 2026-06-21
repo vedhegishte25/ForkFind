@@ -56,18 +56,22 @@ Built with modern web technologies, ForkFind focuses on convenience, accessibili
 The Group Decision Solver is one of the core features of ForkFind, designed to simplify the often challenging process of deciding where a group should eat. 
 When dining with friends, family, or colleagues, individuals frequently have different tastes, dietary restrictions, budgets, and cuisine preferences, making it difficult to reach a consensus. 
 This feature addresses that problem by collecting preferences from multiple users and intelligently analyzing them to identify common interests and areas of overlap.
+<br>
 <img width="943" height="434" alt="Screenshot 2026-06-20 034621" src="https://github.com/user-attachments/assets/fe7e0729-d361-47e0-93b9-4fec1feacc81" />
 <br>
-<img width="945" height="437" alt="Screenshot 2026-06-20 034637" src="https://github.com/user-attachments/assets/6d19ea26-bcee-4f46-8f79-8a94ae25a50a" />
 Once all group members submit their choices, the system evaluates the responses and generates restaurant or meal recommendations that best match the collective preferences of the group.
 The system gathers and analyzes the preferences of all session members in real time, identifying common interests and balancing individual choices to generate recommendations that best suit the group as a whole.
 By considering multiple factors simultaneously, the feature minimizes conflicts and eliminates the need for lengthy discussions about where to eat.
 Participants can view the group's progress and contribute their preferences until a final recommendation is produced.
+<br>
+<img width="945" height="437" alt="Screenshot 2026-06-20 034637" src="https://github.com/user-attachments/assets/6d19ea26-bcee-4f46-8f79-8a94ae25a50a" />
+
 
 ---
 
 ## Food Challenges
 The Food Challenges page is an interactive and gamified component of ForkFind that encourages users to explore different cuisines, dining experiences, and food-related activities. Users can participate in a variety of themed challenges, each designed to make food discovery more engaging and rewarding.
+<br>
 <img width="943" height="436" alt="Screenshot 2026-06-20 034112" src="https://github.com/user-attachments/assets/3de94285-11db-44fd-9b09-3effdb7137a1" />
 <br>
 Additional challenges can be tailored to different food interests, such as trying healthy meals, tasting dishes from multiple countries, visiting highly rated restaurants, or exploring unique food categories.
