@@ -27,7 +27,7 @@ Built with modern web technologies, ForkFind focuses on convenience, accessibili
 - HTML5
 - CSS3
 - JavaScript (ES6+)
-- Jinja2 Templates
+- Jinja2 Template
 
 **Backend**
 - Python
